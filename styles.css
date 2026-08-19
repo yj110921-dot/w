@@ -718,3 +718,46 @@ details[open] summary::after { content: '-'; }
   text-shadow: none;
   font-size: 1.08rem;
 }
+
+.music-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 30;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(17, 17, 17, 0.12);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.25s ease;
+}
+
+.music-toggle:active {
+  transform: scale(0.94);
+}
+
+.music-toggle:not(.is-playing) {
+  opacity: 0.55;
+}
+
+.music-icon {
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.music-toggle.is-playing .music-icon {
+  animation: musicPulse 1.55s ease-in-out infinite;
+}
+
+@keyframes musicPulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1px) scale(1.12); }
+}

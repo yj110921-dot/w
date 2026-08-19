@@ -222,3 +222,53 @@ galleryToggle?.addEventListener('click', () => {
   const isExpanded = gallerySection?.classList.toggle('is-expanded');
   galleryToggle.setAttribute('aria-expanded', String(Boolean(isExpanded)));
 });
+
+const bgm = document.querySelector('#bgm');
+const musicToggle = document.querySelector('.music-toggle');
+let bgmWasStarted = false;
+
+const syncMusicButton = () => {
+  if (!bgm || !musicToggle) return;
+  const isPlaying = !bgm.paused;
+  musicToggle.classList.toggle('is-playing', isPlaying);
+  musicToggle.setAttribute('aria-pressed', String(isPlaying));
+  musicToggle.setAttribute('aria-label', isPlaying ? '배경음악 일시정지' : '배경음악 재생');
+};
+
+const playBgm = async (showNotice = false) => {
+  if (!bgm) return;
+  try {
+    await bgm.play();
+    bgmWasStarted = true;
+    syncMusicButton();
+  } catch (error) {
+    syncMusicButton();
+    if (showNotice) showToast('음악 버튼을 눌러 재생해주세요');
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  window.setTimeout(() => playBgm(false), 350);
+});
+
+['pointerdown', 'touchstart', 'keydown'].forEach((eventName) => {
+  document.addEventListener(eventName, (event) => {
+    if (event.target.closest('.music-toggle')) return;
+    if (!bgm || bgmWasStarted || !bgm.paused) return;
+    playBgm(false);
+  }, { once: true, passive: true });
+});
+
+musicToggle?.addEventListener('click', (event) => {
+  event.stopPropagation();
+  if (!bgm) return;
+  if (bgm.paused) {
+    playBgm(true);
+  } else {
+    bgm.pause();
+    syncMusicButton();
+  }
+});
+
+bgm?.addEventListener('play', syncMusicButton);
+bgm?.addEventListener('pause', syncMusicButton);
