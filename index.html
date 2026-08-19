@@ -14,21 +14,8 @@
 </head>
 <body>
   <main class='invite'>
-    <section class='hero section' aria-label='청첩장 표지'>
-      <p class='small-caps'>WEDDING INVITATION</p>
-      <div class='hero-names'>
-        <div>
-          <strong>Yoon Sangje</strong>
-          <span>윤상제</span>
-        </div>
-        <em>&amp;</em>
-        <div>
-          <strong>Lee Jinsil</strong>
-          <span>이진실</span>
-        </div>
-      </div>
-      <p class='hero-date'>2026.11.15 SUN 02:00 PM</p>
-      <p class='hero-place'>CALLADIUM HALL 3F<br>ESCALADIUM BUPYEONG</p>
+    <section class='hero section cover-image-section' aria-label='청첩장 표지'>
+      <img class='hero-cover-image' src='./assets/cover.png' alt='윤상제 이진실 모바일 청첩장 표지'>
     </section>
 
     <section class='message section'>
@@ -37,15 +24,22 @@
       <p>저희 두 사람이 소중한 분들을 모시고<br>부부의 첫걸음을 내딛습니다.<br>오셔서 따뜻한 마음으로 축복해 주시면<br>큰 기쁨으로 간직하겠습니다.</p>
     </section>
 
-    <section class='gallery section' aria-label='사진 갤러리'>
-      <p class='section-title'>GALLERY</p>
-      <div class='photo-main placeholder'>PHOTO</div>
-      <div class='photo-grid'>
-        <div class='placeholder'>01</div>
-        <div class='placeholder'>02</div>
-        <div class='placeholder'>03</div>
+    <section class='gallery gallery-single' aria-label='사진 갤러리'>
+      <div class='gallery-preview-panel'>
+        <img src='./assets/gallery-preview.jpg' alt='윤상제 이진실 웨딩 갤러리 미리보기'>
       </div>
-      <p class='hint'>사진이 준비되면 assets 폴더에 넣고 이미지 경로만 연결하면 됩니다.</p>
+      <div class='gallery-collapsible' id='galleryCollapsible'>
+        <img src='./assets/gallery-complete.jpg' alt='윤상제 이진실 웨딩 갤러리'>
+        <div class='gallery-closing'>
+          <p>오셔서 축복해 주시는 마음<br>오래도록 소중히 간직하겠습니다.</p>
+          <img src='./assets/gallery-ending.png' alt='윤상제 이진실 웨딩 사진'>
+          <strong>윤상제 · 이진실 드림</strong>
+        </div>
+      </div>
+      <button class='gallery-toggle' type='button' aria-expanded='false' aria-controls='galleryCollapsible'>
+        <span class='toggle-open'>⌄ 눌러서 갤러리 더보기 ⌄</span>
+        <span class='toggle-close'>⌃ 갤러리 접기 ⌃</span>
+      </button>
     </section>
 
     <section class='calendar-section section'>
@@ -88,24 +82,27 @@
       <details>
         <summary>신랑측 계좌번호</summary>
         <div class='account-row'>
-          <span>은행명 계좌번호</span>
-          <button type='button' data-copy='은행명 계좌번호'>복사</button>
+          <span><strong>신랑 윤상제</strong><br>카카오뱅크 3333079191980</span>
+          <button type='button' data-copy='카카오뱅크 3333079191980 신랑 윤상제'>복사</button>
+        </div>
+        <div class='account-row'>
+          <span><strong>신랑 어머니 강복임</strong><br>농협 352-1286-7230-43</span>
+          <button type='button' data-copy='농협 352-1286-7230-43 신랑 어머니 강복임'>복사</button>
         </div>
       </details>
       <details>
         <summary>신부측 계좌번호</summary>
         <div class='account-row'>
-          <span>은행명 계좌번호</span>
-          <button type='button' data-copy='은행명 계좌번호'>복사</button>
+          <span><strong>신부 이진실</strong><br>우리은행 1002148466651</span>
+          <button type='button' data-copy='우리은행 1002148466651 신부 이진실'>복사</button>
+        </div>
+        <div class='account-row'>
+          <span><strong>신부 어머니 박혜선</strong><br>국민 696301 01 061985</span>
+          <button type='button' data-copy='국민 696301 01 061985 신부 어머니 박혜선'>복사</button>
         </div>
       </details>
-      <p class='hint'>계좌 정보 받으면 이름, 은행, 계좌번호로 바로 교체하면 됩니다.</p>
     </section>
 
-    <section class='closing section'>
-      <p>오셔서 축복해 주시는 마음<br>오래도록 소중히 간직하겠습니다.</p>
-      <strong>윤상제 · 이진실 드림</strong>
-    </section>
     <section class='guestbook section'>
       <p class='section-title'>GUESTBOOK</p>
       <h2>온라인 방명록</h2>
@@ -119,7 +116,8 @@
           <span>메시지</span>
           <textarea id='guestMessage' name='message' maxlength='120' rows='4' placeholder='축하 메시지를 남겨주세요' required></textarea>
         </label>
-        <button type='submit'>축하글 남기기</button>
+        <button type='submit' id='guestSubmitButton'>축하글 남기기</button>
+        <button class='guestbook-cancel' type='button' id='guestCancelEdit' hidden>수정 취소</button>
       </form>
       <div class='guestbook-list' id='guestbookList' aria-live='polite'></div>
     </section>
