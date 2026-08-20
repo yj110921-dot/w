@@ -24,22 +24,42 @@
       <p>저희 두 사람이 소중한 분들을 모시고<br>부부의 첫걸음을 내딛습니다.<br>오셔서 따뜻한 마음으로 축복해 주시면<br>큰 기쁨으로 간직하겠습니다.</p>
     </section>
 
-    <section class='gallery gallery-single' aria-label='사진 갤러리'>
-      <div class='gallery-preview-panel'>
-        <img src='./assets/gallery-preview.jpg' alt='윤상제 이진실 웨딩 갤러리 미리보기'>
+    <section class='gallery gallery-slider' aria-label='사진 갤러리'>
+      <div class='gallery-main'>
+        <img id='galleryMainImage' src='./assets/slider/7.jpg' alt='윤상제 이진실 웨딩 사진 7'>
       </div>
-      <div class='gallery-collapsible' id='galleryCollapsible'>
-        <img src='./assets/gallery-complete.jpg' alt='윤상제 이진실 웨딩 갤러리'>
-        <div class='gallery-closing'>
-          <p>오셔서 축복해 주시는 마음<br>오래도록 소중히 간직하겠습니다.</p>
-          <img src='./assets/gallery-ending.png' alt='윤상제 이진실 웨딩 사진'>
-          <strong>윤상제 · 이진실 드림</strong>
+      <div class='gallery-thumb-rail' aria-label='웨딩 사진 썸네일'>
+        <div class='gallery-swipe-hint' aria-hidden='true'>
+          <span class='swipe-hand'>↔</span>
+          <span>옆으로 넘겨보세요</span>
+        </div>
+        <div class='gallery-thumb-belt'>
+          <button class='gallery-thumb is-active' type='button' data-gallery-src='./assets/slider/7.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 7'><img src='./assets/slider/7.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/2.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 2'><img src='./assets/slider/2.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/8.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 8'><img src='./assets/slider/8.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/1.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 1'><img src='./assets/slider/1.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/3.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 3'><img src='./assets/slider/3.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/4.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 4'><img src='./assets/slider/4.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/5.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 5'><img src='./assets/slider/5.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/6.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 6'><img src='./assets/slider/6.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/10.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 10'><img src='./assets/slider/10.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/7.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 7' aria-hidden='true' tabindex='-1'><img src='./assets/slider/7.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/2.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 2' aria-hidden='true' tabindex='-1'><img src='./assets/slider/2.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/8.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 8' aria-hidden='true' tabindex='-1'><img src='./assets/slider/8.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/1.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 1' aria-hidden='true' tabindex='-1'><img src='./assets/slider/1.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/3.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 3' aria-hidden='true' tabindex='-1'><img src='./assets/slider/3.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/4.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 4' aria-hidden='true' tabindex='-1'><img src='./assets/slider/4.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/5.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 5' aria-hidden='true' tabindex='-1'><img src='./assets/slider/5.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/6.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 6' aria-hidden='true' tabindex='-1'><img src='./assets/slider/6.jpg' alt=''></button>
+          <button class='gallery-thumb' type='button' data-gallery-src='./assets/slider/10.jpg' data-gallery-alt='윤상제 이진실 웨딩 사진 10' aria-hidden='true' tabindex='-1'><img src='./assets/slider/10.jpg' alt=''></button>
         </div>
       </div>
-      <button class='gallery-toggle' type='button' aria-expanded='false' aria-controls='galleryCollapsible'>
-        <span class='toggle-open'>⌄ 눌러서 갤러리 더보기 ⌄</span>
-        <span class='toggle-close'>⌃ 갤러리 접기 ⌃</span>
-      </button>
+      <div class='gallery-closing'>
+        <img class='gallery-thankyou-image' src='./assets/gallery-thankyou.jpg' alt='Thank you for celebrating with us 웨딩 사진'>
+        <p>오셔서 축복해 주시는 마음<br>오래도록 소중히 간직하겠습니다.</p>
+        <img class='gallery-ending-photo' src='./assets/gallery-ending.png' alt='윤상제 이진실 웨딩 사진'>
+        <strong>윤상제 · 이진실 드림</strong>
+      </div>
     </section>
 
     <section class='calendar-section section'>
@@ -86,8 +106,12 @@
           <button type='button' data-copy='카카오뱅크 3333079191980 신랑 윤상제'>복사</button>
         </div>
         <div class='account-row'>
-          <span><strong>신랑 어머니 강복임</strong><br>농협 352-1286-7230-43</span>
-          <button type='button' data-copy='농협 352-1286-7230-43 신랑 어머니 강복임'>복사</button>
+          <span><strong>신랑 아버지 윤보원</strong><br>농협 3561350509363</span>
+          <button type='button' data-copy='농협 3561350509363 신랑 아버지 윤보원'>복사</button>
+        </div>
+        <div class='account-row'>
+          <span><strong>신랑 어머니 강복임</strong><br>농협 3521286723043</span>
+          <button type='button' data-copy='농협 3521286723043 신랑 어머니 강복임'>복사</button>
         </div>
       </details>
       <details>

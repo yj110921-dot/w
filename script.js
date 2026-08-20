@@ -216,12 +216,6 @@ if (galleryClosing) {
   }
 }
 
-const gallerySection = document.querySelector('.gallery-single');
-const galleryToggle = document.querySelector('.gallery-toggle');
-galleryToggle?.addEventListener('click', () => {
-  const isExpanded = gallerySection?.classList.toggle('is-expanded');
-  galleryToggle.setAttribute('aria-expanded', String(Boolean(isExpanded)));
-});
 
 const bgm = document.querySelector('#bgm');
 const musicToggle = document.querySelector('.music-toggle');
@@ -272,3 +266,115 @@ musicToggle?.addEventListener('click', (event) => {
 
 bgm?.addEventListener('play', syncMusicButton);
 bgm?.addEventListener('pause', syncMusicButton);
+
+const galleryMainImage = document.querySelector('#galleryMainImage');
+const galleryThumbRail = document.querySelector('.gallery-thumb-rail');
+const galleryThumbBelt = document.querySelector('.gallery-thumb-belt');
+const galleryThumbs = document.querySelectorAll('.gallery-thumb');
+let galleryAutoScrollId = null;
+let galleryIsInteracting = false;
+let galleryInteractionTimer = null;
+
+const setActiveGalleryImage = (button) => {
+  if (!galleryMainImage || !button) return;
+  const nextSrc = button.dataset.gallerySrc;
+  if (!nextSrc || galleryMainImage.getAttribute('src') === nextSrc) return;
+
+  galleryMainImage.classList.add('is-changing');
+  window.setTimeout(() => {
+    galleryMainImage.src = nextSrc;
+    galleryMainImage.alt = button.dataset.galleryAlt || '윤상제 이진실 웨딩 사진';
+    galleryMainImage.classList.toggle('is-contain', nextSrc.includes('/6.jpg'));
+    galleryMainImage.classList.remove('is-changing');
+  }, 160);
+
+  galleryThumbs.forEach((thumb) => {
+    thumb.classList.toggle('is-active', thumb.dataset.gallerySrc === nextSrc);
+  });
+};
+
+const pauseGalleryAutoScroll = () => {
+  galleryIsInteracting = true;
+  window.clearTimeout(galleryInteractionTimer);
+  galleryInteractionTimer = window.setTimeout(() => {
+    galleryIsInteracting = false;
+  }, 1800);
+};
+
+const startGalleryAutoScroll = () => {
+  if (!galleryThumbRail || !galleryThumbBelt) return;
+  const step = () => {
+    const loopPoint = galleryThumbBelt.scrollWidth / 2;
+    if (!galleryIsInteracting && loopPoint > 0) {
+      galleryThumbRail.scrollLeft += 0.45;
+      if (galleryThumbRail.scrollLeft >= loopPoint) {
+        galleryThumbRail.scrollLeft -= loopPoint;
+      }
+    }
+    galleryAutoScrollId = window.requestAnimationFrame(step);
+  };
+  galleryAutoScrollId = window.requestAnimationFrame(step);
+};
+
+galleryThumbs.forEach((button) => {
+  button.addEventListener('click', () => {
+    pauseGalleryAutoScroll();
+    setActiveGalleryImage(button);
+  });
+});
+
+['pointerdown', 'touchstart', 'wheel'].forEach((eventName) => {
+  galleryThumbRail?.addEventListener(eventName, pauseGalleryAutoScroll, { passive: true });
+});
+
+galleryThumbRail?.addEventListener('scroll', () => {
+  if (!galleryThumbBelt) return;
+  const loopPoint = galleryThumbBelt.scrollWidth / 2;
+  if (loopPoint > 0 && galleryThumbRail.scrollLeft >= loopPoint) {
+    galleryThumbRail.scrollLeft -= loopPoint;
+  }
+}, { passive: true });
+
+startGalleryAutoScroll();
+
+window.addEventListener('beforeunload', () => {
+  if (galleryAutoScrollId) window.cancelAnimationFrame(galleryAutoScrollId);
+});
+
+const gallerySwipeHint = document.querySelector('.gallery-swipe-hint');
+let gallerySwipeHintTimer = null;
+let gallerySwipeHintWasShown = false;
+
+const hideGallerySwipeHint = () => {
+  window.clearTimeout(gallerySwipeHintTimer);
+  gallerySwipeHint?.classList.add('is-hidden');
+  gallerySwipeHint?.classList.remove('is-visible');
+};
+
+const showGallerySwipeHint = () => {
+  if (!gallerySwipeHint || gallerySwipeHintWasShown) return;
+  gallerySwipeHintWasShown = true;
+  gallerySwipeHintTimer = window.setTimeout(() => {
+    gallerySwipeHint.classList.add('is-visible');
+    window.setTimeout(hideGallerySwipeHint, 3300);
+  }, 0);
+};
+
+if (galleryThumbRail && gallerySwipeHint) {
+  if ('IntersectionObserver' in window) {
+    const swipeHintObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        showGallerySwipeHint();
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.35 });
+    swipeHintObserver.observe(galleryThumbRail);
+  } else {
+    showGallerySwipeHint();
+  }
+}
+
+['pointerdown', 'touchstart', 'wheel', 'scroll'].forEach((eventName) => {
+  galleryThumbRail?.addEventListener(eventName, hideGallerySwipeHint, { once: true, passive: true });
+});
