@@ -26,50 +26,29 @@ const guestNameInput = document.querySelector('#guestName');
 const guestMessageInput = document.querySelector('#guestMessage');
 const guestSubmitButton = document.querySelector('#guestSubmitButton');
 const guestCancelEdit = document.querySelector('#guestCancelEdit');
-const guestbookKey = 'sangje-jinsil-guestbook';
-const guestbookOwnerKey = 'sangje-jinsil-guestbook-owner';
 let editingGuestbookId = null;
 let longPressTimer;
 let activeActionsCard = null;
+let guestbookEntries = [];
+let currentGuestbookUserId = null;
+let guestbookApi = null;
 
-const guestbookOwnerId = (() => {
-  const existingId = localStorage.getItem(guestbookOwnerKey);
-  if (existingId) return existingId;
-  const newId = `owner-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  localStorage.setItem(guestbookOwnerKey, newId);
-  return newId;
-})();
+const firebaseConfig = {
+  apiKey: "AIzaSyAM3223C0FgwRUxgyV60ive1XtU6m_bqbs",
+  authDomain: "wedding-guestbook-8f222.firebaseapp.com",
+  projectId: "wedding-guestbook-8f222",
+  storageBucket: "wedding-guestbook-8f222.firebasestorage.app",
+  messagingSenderId: "436965062966",
+  appId: "1:436965062966:web:74f92c54b25eb5b4d81b97"
+};
 
-const escapeGuestbookText = (value) => value.replace(/[&<>"']/g, (char) => ({
+const escapeGuestbookText = (value = '') => value.replace(/[&<>"']/g, (char) => ({
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
   "'": '&#039;'
 }[char]));
-
-const createGuestbookId = () => `guest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-const getGuestbookEntries = () => JSON.parse(localStorage.getItem(guestbookKey) || '[]');
-const setGuestbookEntries = (entries) => localStorage.setItem(guestbookKey, JSON.stringify(entries));
-
-function normalizeGuestbookEntries() {
-  const entries = getGuestbookEntries();
-  let changed = false;
-  const normalized = entries.map((entry) => {
-    const nextEntry = { ...entry };
-    if (!nextEntry.id) {
-      nextEntry.id = createGuestbookId();
-      changed = true;
-    }
-    if (!nextEntry.ownerId) {
-      nextEntry.ownerId = guestbookOwnerId;
-      changed = true;
-    }
-    return nextEntry;
-  });
-  if (changed) setGuestbookEntries(normalized);
-  return normalized;
-}
 
 function hideGuestbookActions() {
   activeActionsCard?.classList.remove('show-actions');
@@ -83,8 +62,16 @@ function resetGuestbookEdit() {
   if (guestCancelEdit) guestCancelEdit.hidden = true;
 }
 
+function setGuestbookBusy(isBusy) {
+  if (!guestSubmitButton) return;
+  guestSubmitButton.disabled = isBusy;
+  guestSubmitButton.textContent = isBusy
+    ? '저장 중...'
+    : editingGuestbookId ? '수정 완료' : '축하글 남기기';
+}
+
 function editGuestbookEntry(id) {
-  const entry = getGuestbookEntries().find((item) => item.id === id && item.ownerId === guestbookOwnerId);
+  const entry = guestbookEntries.find((item) => item.id === id && item.ownerId === currentGuestbookUserId);
   if (!entry || !guestNameInput || !guestMessageInput) return;
   editingGuestbookId = id;
   guestNameInput.value = entry.name;
@@ -95,25 +82,35 @@ function editGuestbookEntry(id) {
   hideGuestbookActions();
 }
 
-function deleteGuestbookEntry(id) {
-  const entry = getGuestbookEntries().find((item) => item.id === id && item.ownerId === guestbookOwnerId);
-  if (!entry) return;
+async function deleteGuestbookEntry(id) {
+  const entry = guestbookEntries.find((item) => item.id === id && item.ownerId === currentGuestbookUserId);
+  if (!entry || !guestbookApi) return;
   if (!window.confirm('이 축하글을 삭제할까요?')) return;
-  setGuestbookEntries(getGuestbookEntries().filter((item) => item.id !== id));
-  if (editingGuestbookId === id) resetGuestbookEdit();
-  renderGuestbook();
-  showToast('삭제되었습니다');
+
+  try {
+    await guestbookApi.deleteDoc(guestbookApi.doc(guestbookApi.db, 'guestbook', id));
+    if (editingGuestbookId === id) resetGuestbookEdit();
+    showToast('삭제되었습니다');
+  } catch {
+    showToast('삭제에 실패했습니다');
+  }
 }
 
 const renderGuestbook = () => {
   if (!guestbookList) return;
-  const entries = normalizeGuestbookEntries();
-  if (!entries.length) {
+
+  if (!currentGuestbookUserId) {
+    guestbookList.innerHTML = '<p class="guestbook-empty">방명록을 불러오는 중입니다.</p>';
+    return;
+  }
+
+  if (!guestbookEntries.length) {
     guestbookList.innerHTML = '<p class="guestbook-empty">아직 남겨진 축하글이 없습니다.</p>';
     return;
   }
-  guestbookList.innerHTML = entries.map((entry, index) => {
-    const isMine = entry.ownerId === guestbookOwnerId;
+
+  guestbookList.innerHTML = guestbookEntries.map((entry, index) => {
+    const isMine = entry.ownerId === currentGuestbookUserId;
     return `
       <article class="guestbook-card ${index % 2 ? 'is-right' : 'is-left'} ${isMine ? 'is-mine' : ''}" data-id="${entry.id}">
         <div class="guestbook-bubble">
@@ -131,31 +128,80 @@ const renderGuestbook = () => {
   }).join('');
 };
 
-guestbookForm?.addEventListener('submit', (event) => {
+async function setupGuestbook() {
+  if (!guestbookForm || !guestbookList) return;
+  renderGuestbook();
+
+  try {
+    const [appModule, authModule, firestoreModule] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
+    ]);
+
+    const app = appModule.initializeApp(firebaseConfig);
+    const auth = authModule.getAuth(app);
+    const db = firestoreModule.getFirestore(app);
+    guestbookApi = { db, ...firestoreModule };
+
+    authModule.onAuthStateChanged(auth, (user) => {
+      currentGuestbookUserId = user?.uid || null;
+      renderGuestbook();
+    });
+
+    await authModule.signInAnonymously(auth);
+
+    const guestbookQuery = firestoreModule.query(
+      firestoreModule.collection(db, 'guestbook'),
+      firestoreModule.orderBy('createdAt', 'desc')
+    );
+
+    firestoreModule.onSnapshot(guestbookQuery, (snapshot) => {
+      guestbookEntries = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...docSnapshot.data()
+      }));
+      renderGuestbook();
+    }, () => {
+      guestbookList.innerHTML = '<p class="guestbook-empty">방명록 연결 설정을 확인해주세요.</p>';
+    });
+  } catch {
+    guestbookList.innerHTML = '<p class="guestbook-empty">방명록을 불러오지 못했습니다.</p>';
+  }
+}
+
+guestbookForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const name = guestNameInput.value.trim();
   const message = guestMessageInput.value.trim();
-  if (!name || !message) return;
-  const entries = getGuestbookEntries();
+  if (!name || !message || !guestbookApi || !currentGuestbookUserId) return;
 
-  if (editingGuestbookId) {
-    setGuestbookEntries(entries.map((entry) => (
-      entry.id === editingGuestbookId && entry.ownerId === guestbookOwnerId
-        ? { ...entry, name, message }
-        : entry
-    )));
-    resetGuestbookEdit();
-    showToast('수정되었습니다');
-  } else {
-    setGuestbookEntries([
-      { id: createGuestbookId(), ownerId: guestbookOwnerId, name, message },
-      ...entries
-    ].slice(0, 20));
-    guestbookForm.reset();
-    showToast('축하글이 남겨졌습니다');
+  setGuestbookBusy(true);
+
+  try {
+    if (editingGuestbookId) {
+      await guestbookApi.updateDoc(guestbookApi.doc(guestbookApi.db, 'guestbook', editingGuestbookId), {
+        name,
+        message,
+        updatedAt: guestbookApi.serverTimestamp()
+      });
+      resetGuestbookEdit();
+      showToast('수정되었습니다');
+    } else {
+      await guestbookApi.addDoc(guestbookApi.collection(guestbookApi.db, 'guestbook'), {
+        ownerId: currentGuestbookUserId,
+        name,
+        message,
+        createdAt: guestbookApi.serverTimestamp()
+      });
+      guestbookForm.reset();
+      showToast('축하글이 남겨졌습니다');
+    }
+  } catch {
+    showToast('저장에 실패했습니다');
+  } finally {
+    setGuestbookBusy(false);
   }
-
-  renderGuestbook();
 });
 
 guestCancelEdit?.addEventListener('click', resetGuestbookEdit);
@@ -198,7 +244,7 @@ document.addEventListener('click', (event) => {
   if (!event.target.closest('.guestbook-card')) hideGuestbookActions();
 });
 
-renderGuestbook();
+setupGuestbook();
 
 const galleryClosing = document.querySelector('.gallery-closing');
 if (galleryClosing) {
