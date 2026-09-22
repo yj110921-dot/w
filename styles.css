@@ -832,6 +832,7 @@ details[open] summary::after { content: '-'; }
 .gallery-main {
   position: relative;
   width: 100%;
+  overflow: hidden;
   background: #ffffff;
 }
 
@@ -850,32 +851,57 @@ details[open] summary::after { content: '-'; }
 }
 
 .gallery-main img.is-sliding-next {
-  animation: gallery-slide-next 360ms ease-out;
+  animation: gallery-slide-next 460ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .gallery-main img.is-sliding-prev {
-  animation: gallery-slide-prev 360ms ease-out;
+  animation: gallery-slide-prev 460ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.gallery-main img.gallery-slide-out {
+  position: absolute;
+  top: 0;
+  left: 18px;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+}
+
+.gallery-main img.gallery-slide-out-next {
+  animation: gallery-slide-out-next 460ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.gallery-main img.gallery-slide-out-prev {
+  animation: gallery-slide-out-prev 460ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
 @keyframes gallery-slide-next {
   from {
-    opacity: 0.35;
-    transform: translateX(26px);
+    transform: translateX(100%);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
   }
 }
 
 @keyframes gallery-slide-prev {
   from {
-    opacity: 0.35;
-    transform: translateX(-26px);
+    transform: translateX(-100%);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes gallery-slide-out-next {
+  to {
+    transform: translateX(-110%);
+  }
+}
+
+@keyframes gallery-slide-out-prev {
+  to {
+    transform: translateX(110%);
   }
 }
 
@@ -884,26 +910,27 @@ details[open] summary::after { content: '-'; }
   top: 50%;
   z-index: 2;
   display: grid;
-  width: 44px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 50%;
+  background: rgba(17, 17, 17, 0.38);
   color: #ffffff;
   place-items: center;
   transform: translateY(-50%);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.48));
-  transition: opacity 180ms ease, transform 180ms ease;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  transition: background 180ms ease, opacity 180ms ease, transform 180ms ease;
 }
 
 .gallery-arrow span {
   display: block;
   margin-top: -3px;
   font-family: Arial, sans-serif;
-  font-size: 2.1rem;
+  font-size: 2.55rem;
   font-weight: 300;
   line-height: 1;
 }
@@ -918,6 +945,7 @@ details[open] summary::after { content: '-'; }
 
 .gallery-arrow:active {
   opacity: 0.65;
+  background: rgba(17, 17, 17, 0.56);
   transform: translateY(-50%) scale(0.94);
 }
 

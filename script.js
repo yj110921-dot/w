@@ -330,12 +330,26 @@ const setActiveGalleryImage = (button, direction = 0) => {
   if (!nextSrc || galleryMainImage.getAttribute('src') === nextSrc) return;
 
   if (direction) {
+    document.querySelectorAll('.gallery-slide-out').forEach((image) => image.remove());
+    const previousImage = galleryMainImage.cloneNode(true);
+    previousImage.removeAttribute('id');
+    previousImage.classList.remove('is-changing', 'is-sliding-next', 'is-sliding-prev');
+    previousImage.classList.add(
+      'gallery-slide-out',
+      direction > 0 ? 'gallery-slide-out-next' : 'gallery-slide-out-prev'
+    );
+    galleryMainImage.parentElement?.append(previousImage);
+
     galleryMainImage.classList.remove('is-changing', 'is-sliding-next', 'is-sliding-prev');
     galleryMainImage.src = nextSrc;
     galleryMainImage.alt = button.dataset.galleryAlt || '윤상제 이진실 웨딩 사진';
     galleryMainImage.classList.toggle('is-contain', nextSrc.includes('/6.jpg'));
     void galleryMainImage.offsetWidth;
     galleryMainImage.classList.add(direction > 0 ? 'is-sliding-next' : 'is-sliding-prev');
+    galleryMainImage.addEventListener('animationend', () => {
+      galleryMainImage.classList.remove('is-sliding-next', 'is-sliding-prev');
+      previousImage.remove();
+    }, { once: true });
   } else {
     galleryMainImage.classList.add('is-changing');
     window.setTimeout(() => {
