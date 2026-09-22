@@ -317,22 +317,34 @@ const galleryMainImage = document.querySelector('#galleryMainImage');
 const galleryThumbRail = document.querySelector('.gallery-thumb-rail');
 const galleryThumbBelt = document.querySelector('.gallery-thumb-belt');
 const galleryThumbs = document.querySelectorAll('.gallery-thumb');
+const galleryUniqueThumbs = [...galleryThumbs].filter((thumb) => thumb.getAttribute('aria-hidden') !== 'true');
+const galleryPrevButton = document.querySelector('.gallery-arrow-prev');
+const galleryNextButton = document.querySelector('.gallery-arrow-next');
 let galleryAutoScrollId = null;
 let galleryIsInteracting = false;
 let galleryInteractionTimer = null;
 
-const setActiveGalleryImage = (button) => {
+const setActiveGalleryImage = (button, direction = 0) => {
   if (!galleryMainImage || !button) return;
   const nextSrc = button.dataset.gallerySrc;
   if (!nextSrc || galleryMainImage.getAttribute('src') === nextSrc) return;
 
-  galleryMainImage.classList.add('is-changing');
-  window.setTimeout(() => {
+  if (direction) {
+    galleryMainImage.classList.remove('is-changing', 'is-sliding-next', 'is-sliding-prev');
     galleryMainImage.src = nextSrc;
     galleryMainImage.alt = button.dataset.galleryAlt || '윤상제 이진실 웨딩 사진';
     galleryMainImage.classList.toggle('is-contain', nextSrc.includes('/6.jpg'));
-    galleryMainImage.classList.remove('is-changing');
-  }, 160);
+    void galleryMainImage.offsetWidth;
+    galleryMainImage.classList.add(direction > 0 ? 'is-sliding-next' : 'is-sliding-prev');
+  } else {
+    galleryMainImage.classList.add('is-changing');
+    window.setTimeout(() => {
+      galleryMainImage.src = nextSrc;
+      galleryMainImage.alt = button.dataset.galleryAlt || '윤상제 이진실 웨딩 사진';
+      galleryMainImage.classList.toggle('is-contain', nextSrc.includes('/6.jpg'));
+      galleryMainImage.classList.remove('is-changing');
+    }, 160);
+  }
 
   galleryThumbs.forEach((thumb) => {
     thumb.classList.toggle('is-active', thumb.dataset.gallerySrc === nextSrc);
@@ -368,6 +380,21 @@ galleryThumbs.forEach((button) => {
     setActiveGalleryImage(button);
   });
 });
+
+const moveGallery = (direction) => {
+  if (!galleryMainImage || !galleryUniqueThumbs.length) return;
+  const currentSrc = galleryMainImage.getAttribute('src');
+  const currentIndex = galleryUniqueThumbs.findIndex((thumb) => thumb.dataset.gallerySrc === currentSrc);
+  const safeIndex = currentIndex < 0 ? 0 : currentIndex;
+  const nextIndex = (safeIndex + direction + galleryUniqueThumbs.length) % galleryUniqueThumbs.length;
+  const nextThumb = galleryUniqueThumbs[nextIndex];
+
+  pauseGalleryAutoScroll();
+  setActiveGalleryImage(nextThumb, direction);
+};
+
+galleryPrevButton?.addEventListener('click', () => moveGallery(-1));
+galleryNextButton?.addEventListener('click', () => moveGallery(1));
 
 ['pointerdown', 'touchstart', 'wheel'].forEach((eventName) => {
   galleryThumbRail?.addEventListener(eventName, pauseGalleryAutoScroll, { passive: true });
